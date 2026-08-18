@@ -1,44 +1,48 @@
-# SMLIGHT SLZB-Ultima3 — scripts
+# SMLIGHT SLZB-Ultima3 — script
 
-Scripts I use with a [SMLIGHT SLZB-Ultima3](https://smlight.tech) as a
-dual Zigbee gateway for Home Assistant: one radio runs ZHA, another
-runs Zigbee2MQTT, each fully independent (own firmware, own channel).
+Script che uso con una [SMLIGHT SLZB-Ultima3](https://smlight.tech) come
+doppio gateway Zigbee per Home Assistant: una radio gestisce ZHA, l'altra
+Zigbee2MQTT, ciascuna completamente indipendente (firmware proprio,
+canale proprio).
 
-## What's here
+## Cosa c'è
 
-Three scripts run **natively on the device**, in SLZB-OS's own Berry
-scripting engine (uploaded from the device's web UI, Scripts → Files —
-not part of Home Assistant at all):
+Tre script girano **nativamente sul dispositivo**, nel motore di
+scripting Berry di SLZB-OS (caricati dall'interfaccia web del
+dispositivo, Scripts → Files — non fanno parte di Home Assistant):
 
-- **`zigbee_watchdog.be`** — watches each Zigbee radio's connected
-  client count; if ZHA or Zigbee2MQTT disconnects from its radio,
-  sends a Telegram alert (no automatic restart, on purpose). Also
-  alerts on Internet loss (Telegram + buzzer) and low free RAM.
-- **`stato_giornaliero.be`** — a daily Telegram status report (uptime,
-  free RAM, connected clients per radio), sent once at boot and then
-  every 24 hours.
-- **`buzzer_mqtt.be`** — listens on an MQTT topic and plays the
-  matching RTTTL melody on the device's built-in buzzer, confirming via
-  Telegram which sound was played.
+- **`zigbee_watchdog.be`** — controlla il numero di client collegati su
+  ciascuna radio Zigbee; se ZHA o Zigbee2MQTT si disconnette dalla
+  propria radio, invia un avviso Telegram (nessun riavvio automatico,
+  di proposito). Avvisa anche se Internet cade (Telegram + buzzer) o se
+  la RAM libera scende sotto soglia.
+- **`stato_giornaliero.be`** — un report di stato via Telegram (uptime,
+  RAM libera, client collegati su ciascuna radio), inviato subito
+  all'avvio e poi ogni 24 ore.
+- **`buzzer_mqtt.be`** — resta in ascolto su un topic MQTT e fa suonare
+  il buzzer integrato con la melodia RTTTL corrispondente, confermando
+  via Telegram quale suono è stato riprodotto.
 
-One script is Home Assistant-side:
+Uno script è lato Home Assistant:
 
-- **`gateway_zigbee_suono.yaml`** — a Home Assistant script that
-  publishes the chosen sound name to MQTT. All the logic lives on the
-  device (`buzzer_mqtt.be` above); this is just the "remote control".
+- **`gateway_zigbee_suono.yaml`** — uno script Home Assistant che
+  pubblica su MQTT il nome del suono scelto. Tutta la logica vive sul
+  dispositivo (`buzzer_mqtt.be` sopra); questo è solo il "telecomando".
 
-Both native scripts that talk to Telegram require the TELEGRAM
-integration configured first, on the device itself
+I due script nativi che parlano con Telegram richiedono l'integrazione
+TELEGRAM configurata prima, sul dispositivo stesso
 (Scripts → Integrations → TELEGRAM, bot token + chat id).
 
-## Notes if you reuse these
+## Note se li riusi
 
-- `ZB.getZbClients()` needs a radio index as an argument (undocumented
-  publicly at the time I wrote this) — index `0` doesn't exist, valid
-  indices start at `1`. Verify yours before assuming radio 1 / radio 2
-  map the way they do on my unit.
-- The MQTT topic in `buzzer_mqtt.be` / `gateway_zigbee_suono.yaml`
-  (`zhub/suono`) is specific to my broker ACL setup — adjust to
-  whatever topic your own MQTT user can actually publish/subscribe to.
-- SLZB-OS supports up to 3 concurrent scripts, which is exactly how
-  many native ones are here.
+- `ZB.getZbClients()` vuole un indice di radio come argomento (non
+  documentato pubblicamente al momento in cui l'ho scritto) — l'indice
+  `0` non esiste, gli indici validi partono da `1`. Verifica i tuoi
+  prima di dare per scontato che radio 1 / radio 2 corrispondano come
+  sul mio dispositivo.
+- Il topic MQTT in `buzzer_mqtt.be` / `gateway_zigbee_suono.yaml`
+  (`zhub/suono`) è specifico della mia configurazione ACL sul broker —
+  adattalo al topic che il tuo utente MQTT può davvero
+  pubblicare/sottoscrivere.
+- SLZB-OS supporta fino a 3 script contemporanei, esattamente quanti
+  sono quelli nativi qui.
