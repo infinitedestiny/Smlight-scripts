@@ -3,9 +3,6 @@
 Scripts I use with a [SMLIGHT SLZB-Ultima3](https://smlight.tech) as a
 dual Zigbee gateway for Home Assistant: one radio runs ZHA, another
 runs Zigbee2MQTT, each fully independent (own firmware, own channel).
-Full write-up (Italian, with an English translation) is in this repo;
-technical background on why I split the two networks and what else the
-device can do is in `recensione-facebook.txt` / `recensione-facebook-en.txt`.
 
 ## What's here
 
