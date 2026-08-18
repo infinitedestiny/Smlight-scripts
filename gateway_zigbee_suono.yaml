@@ -1,0 +1,51 @@
+# Script Home Assistant lato "telecomando" per il buzzer della
+# SLZB-Ultima3. Non fa altro che pubblicare su MQTT il nome del suono
+# scelto: la logica che decide quale melodia suonare vive sul gateway,
+# nello script nativo buzzer_mqtt.be (vedi il resto di questa cartella).
+#
+# Da copiare dentro scripts.yaml (o incollare come nuovo script
+# dall'interfaccia Impostazioni -> Automazioni e scene -> Script ->
+# Modifica in YAML). L'id "gateway_zigbee_suono" diventa l'entity_id
+# script.gateway_zigbee_suono.
+#
+# Topic sotto zhub/ perché l'utente MQTT del dispositivo (mqttmanager)
+# ha un ACL sul broker che lo limita a quell'albero: se il tuo utente
+# MQTT non ha questa restrizione puoi usare un topic libero, basta che
+# combaci con quello sottoscritto da buzzer_mqtt.be sulla Ultima3.
+
+gateway_zigbee_suono:
+  alias: "[Gateway Zigbee] Riproduci suono sul buzzer SLZB-Ultima3"
+  description: >-
+    Pubblica su MQTT il nome del suono da riprodurre. Lo script nativo
+    buzzer_mqtt.be, caricato direttamente sulla SLZB-Ultima3 (vedi
+    cartella slzb-ultima3/), resta in ascolto su questo topic e comanda
+    il buzzer integrato: la logica vive sul gateway, qui si pubblica solo
+    la scelta. Topic sotto zhub/ perché l'utente MQTT del dispositivo
+    (mqttmanager) sembra avere un ACL che lo limita a quell'albero.
+  fields:
+    suono:
+      name: Suono
+      description: Melodia da riprodurre sul buzzer
+      required: true
+      default: campanello
+      selector:
+        select:
+          options:
+          - label: Campanello
+            value: campanello
+          - label: Allerta
+            value: allerta
+          - label: Errore
+            value: errore
+          - label: Successo
+            value: successo
+          - label: Sirena
+            value: sirena
+  sequence:
+  - action: mqtt.publish
+    data:
+      topic: zhub/suono
+      payload: "{{ suono }}"
+  mode: parallel
+  max: 5
+  icon: mdi:bullhorn-outline
